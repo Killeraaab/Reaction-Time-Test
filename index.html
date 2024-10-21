@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Time Game</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: black; /* Make the whole background black */
+            color: white; /* Make the text white */
+        }
+        #gameContainer {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            background-color: red; /* Red when waiting */
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #message {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        #reactionTime {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        #timer {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reaction Time Game</h1>
+    <div id="gameContainer">
+        <!-- No button now, the game area is the clickable part -->
+    </div>
+    <div id="message">Wait for the area to turn green, then click anywhere!</div>
+    <div id="reactionTime"></div>
+    <div id="timer">Time: 0.000 s</div>
+
+    <script>
+        const gameContainer = document.getElementById('gameContainer');
+        const message = document.getElementById('message');
+        const reactionTimeDisplay = document.getElementById('reactionTime');
+        const timerDisplay = document.getElementById('timer');
+
+        let startTime, reactionTime, timeoutId, timerInterval;
+        let isClickable = false; // To track if the area is clickable
+
+        // Function to update the timer display
+        function updateTimer() {
+            const currentTime = (new Date().getTime() - startTime) / 1000;
+            timerDisplay.textContent = `Time: ${currentTime.toFixed(3)} s`;
+        }
+
+        // Function to start the game (random delay before making the area clickable)
+        function startGame() {
+            message.textContent = "Wait for the area to turn green...";
+            gameContainer.style.backgroundColor = 'red'; // Red while waiting
+            reactionTimeDisplay.textContent = '';
+            timerDisplay.textContent = 'Time: 0.000 s';
+            isClickable = false;
+            clearInterval(timerInterval);
+
+            // Random delay between 2 and 5 seconds
+            const randomDelay = Math.floor(Math.random() * 3000) + 2000;
+
+            // Timer starts when waiting for the area to become clickable
+            startTime = new Date().getTime();
+            timerInterval = setInterval(updateTimer, 10);
+
+            timeoutId = setTimeout(() => {
+                // Switch to green and make the area clickable
+                gameContainer.style.backgroundColor = 'green'; // Green when clickable
+                startTime = new Date().getTime(); // Reset start time for reaction time
+                isClickable = true;
+            }, randomDelay);
+        }
+
+        // Event listener for when the game area is clicked
+        gameContainer.addEventListener('click', function() {
+            if (isClickable) {
+                const endTime = new Date().getTime();
+                reactionTime = (endTime - startTime) / 1000; // Calculate reaction time in seconds
+                reactionTimeDisplay.textContent = `Your reaction time is: ${reactionTime.toFixed(3)} seconds`;
+
+                gameContainer.style.backgroundColor = 'red'; // Reset background to red after click
+                message.textContent = "Click anywhere to try again!";
+                isClickable = false; // Disable further clicks
+                clearInterval(timerInterval); // Stop the timer
+            } else {
+                // Start a new round if area isn't clickable and message is "Click anywhere to try again!"
+                if (message.textContent === "Click anywhere to try again!") {
+                    startGame();
+                }
+            }
+        });
+
+        // Start the game initially
+        startGame();
+    </script>
+</body>
+</html>
